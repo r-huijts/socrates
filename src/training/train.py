@@ -249,27 +249,125 @@ class SocraticTrainer:
             print(f"📁 Loading custom dataset from: {data_path}")
             raw_dataset = load_dataset('json', data_files=data_path)
         else:
-            # Use synthetic Socratic dialogues from data/synthetic directory
-            print("🎲 Loading synthetic Socratic dialogues from data/synthetic/...")
-            data_files = {
-                'train': [
-                    'data/synthetic/general_examples.json',
-                    'data/synthetic/learning_examples.json', 
-                    'data/synthetic/programming_examples.json'
-                ]
-            }
+            # Load ALL synthetic Socratic dialogues from data/synthetic directory
+            print("🎲 Loading ALL synthetic Socratic dialogues from data/synthetic/...")
+            
+            import glob
+            import json
+            
+            # Find all JSON files in the synthetic directory
+            json_files = glob.glob('data/synthetic/*.json')
+            print(f"📂 Found {len(json_files)} files: {[os.path.basename(f) for f in json_files]}")
+            
+            if not json_files:
+                raise ValueError("No JSON files found in data/synthetic/ directory!")
+            
+            # DETAILED LOGGING: Count conversations per file
+            print("\n" + "="*60)
+            print("📋 DETAILED CONVERSATION BREAKDOWN:")
+            print("="*60)
+            
+            total_conversations = 0
+            file_stats = {}
+            
+            for json_file in json_files:
+                try:
+                    with open(json_file, 'r') as f:
+                        data = json.load(f)
+                        conversation_count = len(data)
+                        total_conversations += conversation_count
+                        file_stats[json_file] = conversation_count
+                        
+                        print(f"📄 {os.path.basename(json_file)}: {conversation_count} conversations")
+                        
+                        # Sample a conversation to show structure
+                        if conversation_count > 0 and 'conversations' in data[0]:
+                            sample_conv = data[0]['conversations']
+                            exchange_count = len([msg for msg in sample_conv if msg['role'] in ['user', 'assistant']]) // 2
+                            print(f"   └─ Sample: {exchange_count} exchanges per conversation")
+                            
+                except Exception as e:
+                    print(f"❌ Error loading {json_file}: {e}")
+                    continue
+            
+            print(f"\n🎯 TOTAL CONVERSATIONS DISCOVERED: {total_conversations}")
+            print("="*60)
+            
+            # Load all files
+            data_files = {'train': json_files}
             raw_dataset = load_dataset('json', data_files=data_files)
+            
+            # Verify the loaded count matches our manual count
+            loaded_count = len(raw_dataset['train'])
+            print(f"✅ HuggingFace loaded: {loaded_count} examples")
+            
+            if loaded_count != total_conversations:
+                print(f"⚠️  WARNING: Count mismatch! Expected {total_conversations}, got {loaded_count}")
+            else:
+                print(f"✅ Perfect match: All {total_conversations} conversations loaded successfully!")
         
-        self.dataset = preparator.prepare_dataset(
-            self.tokenizer,  # tokenizer first
-            data_dir="data/synthetic"  # let it use the default data directory
+        # Prepare dataset using our preparator
+        self.dataset = preparator.format_for_training(raw_dataset, self.tokenizer)
+        
+        # Create train/validation split
+        train_test_split = self.dataset['train'].train_test_split(
+            test_size=0.1,  # 10% for validation
+            seed=42
         )
         
-        # Print dataset info
-        dataset_info = preparator.get_dataset_info(self.dataset)
-        print("📊 Dataset Statistics:")
-        for key, value in dataset_info.items():
-            print(f"   {key}: {value}")
+        self.dataset = {
+            'train': train_test_split['train'],
+            'validation': train_test_split['test']
+        }
+        
+        # FINAL TRAINING STATISTICS
+        print("\n" + "="*60)
+        print("🏋️ FINAL TRAINING DATASET STATISTICS:")
+        print("="*60)
+        print(f"   📚 Total conversations: {len(self.dataset['train']) + len(self.dataset['validation'])}")
+        print(f"   🏋️ Training conversations: {len(self.dataset['train'])}")
+        print(f"   📊 Validation conversations: {len(self.dataset['validation'])}")
+        print(f"   📁 Source files: {len(json_files) if 'json_files' in locals() else 'custom'}")
+        print(f"   🎯 Train/Val split: {90}%/{10}%")
+        
+        # Calculate training steps
+        effective_batch_size = (self.training_config.per_device_train_batch_size * 
+                            self.training_config.gradient_accumulation_steps)
+        steps_per_epoch = len(self.dataset['train']) // effective_batch_size
+        total_steps = steps_per_epoch * self.training_config.num_train_epochs
+        
+        print(f"   ⚡ Effective batch size: {effective_batch_size}")
+        print(f"   📈 Steps per epoch: {steps_per_epoch}")
+        print(f"   🎯 Total training steps: {total_steps}")
+        print(f"   ⏱️ Estimated time: {total_steps * 2.5:.0f}-{total_steps * 4:.0f} seconds")
+        print("="*60)
+        
+        # Show a sample to verify formatting
+        if len(self.dataset['train']) > 0:
+            sample = self.dataset['train'][0]
+            print(f"📝 Sample conversation preview:")
+            print(f"   {sample['text'][:300]}...")
+            print("="*60)
+        
+        # Log to WandB if available
+        if hasattr(self, 'wandb_config') and self.wandb_config:
+            wandb_stats = {
+                "dataset/total_conversations": len(self.dataset['train']) + len(self.dataset['validation']),
+                "dataset/training_conversations": len(self.dataset['train']),
+                "dataset/validation_conversations": len(self.dataset['validation']),
+                "dataset/source_files": len(json_files) if 'json_files' in locals() else 1,
+                "training/steps_per_epoch": steps_per_epoch,
+                "training/total_steps": total_steps,
+                "training/effective_batch_size": effective_batch_size
+            }
+            
+            # Log file breakdown if we have it
+            if 'file_stats' in locals():
+                for file_path, count in file_stats.items():
+                    file_name = os.path.basename(file_path).replace('.json', '')
+                    wandb_stats[f"dataset/files/{file_name}"] = count
+            
+            print("📈 Logging dataset statistics to WandB...")
     
     def setup_training_arguments(self):
         """
