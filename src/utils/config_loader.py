@@ -79,9 +79,12 @@ class ConfigLoader:
         else:
             return self.load_model_config(config_file)
 
-    def load_training_config(self) -> TrainingConfig:
+    def load_training_config(self, config_path: str = None) -> TrainingConfig:
         """Load training configuration from YAML"""
-        config_path = self.config_dir / "training" / "training_config.yaml"
-        config = self.load_yaml(config_path)
+        if config_path:
+            config_file_path = config_path
+        else:
+            config_file_path = self.config_dir / "training" / "training_config.yaml"
         
+        config = self.load_yaml(config_file_path)
         return TrainingConfig(**config['training'])
