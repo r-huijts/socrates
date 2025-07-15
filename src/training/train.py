@@ -307,7 +307,7 @@ class SocraticTrainer:
                 print(f"✅ Perfect match: All {total_conversations} conversations loaded successfully!")
         
         # Prepare dataset using our preparator
-        self.dataset = preparator.format_for_training(raw_dataset, self.tokenizer)
+        self.dataset = preparator.format_for_training(raw_dataset['train'], self.tokenizer)
         
         # Create train/validation split
         train_test_split = self.dataset['train'].train_test_split(
