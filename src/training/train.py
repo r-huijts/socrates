@@ -557,6 +557,7 @@ def main():
     trainer = SocraticTrainer(args.config)
     trainer.train()
 
+    
 
 if __name__ == "__main__":
     main()
