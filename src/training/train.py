@@ -295,7 +295,8 @@ class SocraticTrainer:
             load_best_model_at_end=True,
             metric_for_best_model="eval_loss",
             greater_is_better=False,
-            fp16=torch.cuda.is_available(),  # Use mixed precision if GPU available
+            fp16=False,
+            bf16=True,
             optim=self.optimizer_config['type'],
             lr_scheduler_type=self.optimizer_config['lr_scheduler_type'],
             report_to="wandb" if self.wandb_config else "none",
