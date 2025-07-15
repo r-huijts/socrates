@@ -1,0 +1,21 @@
+model:
+  name: "Qwen/Qwen2.5-1.5B-Instruct"              # Smaller model for local testing
+  trust_remote_code: true
+  torch_dtype: "auto"
+  device_map: "auto"
+
+quantization:
+  load_in_4bit: false                              # No quantization for local
+  bnb_4bit_compute_dtype: "float16"
+  bnb_4bit_quant_type: "nf4"
+  bnb_4bit_use_double_quant: true
+
+lora:
+  rank: 8                                          # Smaller LoRA rank
+  alpha: 16
+  target_modules: ["q_proj", "v_proj", "k_proj", "o_proj"]
+  dropout: 0.1
+  bias: "none"
+  task_type: "CAUSAL_LM"
+
+chat_template: "qwen-2.5"

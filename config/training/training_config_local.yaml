@@ -1,0 +1,26 @@
+training:
+  output_dir: "./models/socratic-tutor-qwen2.5-local"
+  num_train_epochs: 1                              # Just 1 epoch for testing
+  per_device_train_batch_size: 1                   # Smaller batch for CPU/MPS
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 2                   # Smaller effective batch
+  warmup_steps: 10                                 # Fewer warmup steps
+  learning_rate: 2e-4
+  weight_decay: 0.01
+  logging_steps: 5                                 # Log more frequently
+  save_steps: 50                                   # Save more frequently
+  eval_steps: 50
+
+optimizer:
+  type: "adamw_torch"
+  lr_scheduler_type: "linear"                      # Simpler scheduler
+
+data:
+  max_seq_length: 512                              # Much shorter sequences
+  train_split: 0.9
+  eval_split: 0.1
+
+# No WandB for local testing - just local logs
+local_testing: true
+max_train_samples: 100                             # Limit dataset size for testing
+max_eval_samples: 20

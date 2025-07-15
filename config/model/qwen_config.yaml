@@ -1,0 +1,16 @@
+model:
+  name: "Qwen/Qwen2.5-7B-Instruct"  # The base model - 7B params, already trained for chat
+  max_length: 2048                  # Max tokens in conversation (longer = more context, more memory)
+  torch_dtype: "bfloat16"          # Half precision = faster training, less memory usage
+  device_map: "auto"               # Let PyTorch figure out GPU allocation
+
+lora:
+  r: 16                    # Rank - how many "new pathways" we add (higher = more flexible, more memory)
+  lora_alpha: 32          # Scaling factor - usually 2x the rank (controls how much LoRA affects the model)
+  lora_dropout: 0.1       # 10% dropout to prevent overfitting (standard choice)
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]  # ^ These are Qwen's linear layers we're adapting
+
+quantization:
+  load_in_4bit: true                  # Use 4-bit quantization (saves ~75% memory)
+  bnb_4bit_compute_dtype: "bfloat16"  # Compute in bfloat16 even with 4-bit weights
+  bnb_4bit_use_double_quant: true     # Quantize the quantization constants (extra memory savings)

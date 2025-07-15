@@ -1,0 +1,25 @@
+training:
+  output_dir: "./models/socratic-tutor-qwen2.5"  # Where to save our trained model
+  num_train_epochs: 3                            # How many times through the dataset
+  per_device_train_batch_size: 2                 # Examples per GPU per step
+  per_device_eval_batch_size: 2                  # Examples per GPU during evaluation
+  gradient_accumulation_steps: 8                 # Fake bigger batches (2×8=16 effective)
+  warmup_steps: 100                              # Gradually increase learning rate
+  learning_rate: 2e-4                            # How fast we learn (0.0002)
+  weight_decay: 0.01                             # L2 regularization strength
+  logging_steps: 10                              # Log metrics every 10 steps
+  save_steps: 500                                # Save checkpoint every 500 steps
+  eval_steps: 500                                # Evaluate every 500 steps
+
+optimizer:
+  type: "adamw_torch"                            # AdamW optimizer (good default)
+  lr_scheduler_type: "cosine"                    # Learning rate decays in cosine curve
+
+data:
+  max_seq_length: 2048                           # Max tokens per training example
+  train_split: 0.9                               # 90% of data for training
+  eval_split: 0.1                                # 10% for validation
+
+wandb:
+  project: "socratic-tutor-qwen2.5"             # Weights & Biases project name
+  run_name: "baseline-run"                       # This specific run's name
