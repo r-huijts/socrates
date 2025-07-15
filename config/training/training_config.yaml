@@ -5,7 +5,7 @@ training:
   per_device_eval_batch_size: 2                  # Examples per GPU during evaluation
   gradient_accumulation_steps: 8                 # Fake bigger batches (2×8=16 effective)
   warmup_steps: 100                              # Gradually increase learning rate
-  learning_rate: 2e-4                            # How fast we learn (0.0002)
+  learning_rate: 0.0002                            # How fast we learn (0.0002)
   weight_decay: 0.01                             # L2 regularization strength
   logging_steps: 10                              # Log metrics every 10 steps
   save_steps: 500                                # Save checkpoint every 500 steps
