@@ -259,10 +259,9 @@ class SocraticTrainer:
             }
             raw_dataset = load_dataset('json', data_files=data_files)
         
-        # Prepare dataset using our preparator
         self.dataset = preparator.prepare_dataset(
-            raw_dataset, 
-            self.tokenizer
+            self.tokenizer,  # tokenizer first
+            data_dir="data/synthetic"  # let it use the default data directory
         )
         
         # Print dataset info
