@@ -310,7 +310,7 @@ class SocraticTrainer:
         self.dataset = preparator.format_for_training(raw_dataset['train'], self.tokenizer)
         
         # Create train/validation split
-        train_test_split = self.dataset['train'].train_test_split(
+        train_test_split = self.dataset.train_test_split(
             test_size=0.1,  # 10% for validation
             seed=42
         )
