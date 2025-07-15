@@ -7,7 +7,7 @@ peft>=0.6.0
 
 # Unsloth for fast fine-tuning (without problematic extras)
 unsloth @ git+https://github.com/unslothai/unsloth.git
-
+unsloth_zoo
 # Data processing
 pandas>=2.0.0
 numpy>=1.24.0

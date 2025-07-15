@@ -36,7 +36,7 @@ from datasets import load_dataset
 # Local imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from src.utils.config_loader import ConfigLoader
-from src.training.dataset_preparation import ModernSocraticDatasetPreparator
+from src.training.dataset_preparation import SocraticDatasetPreparator
 
 # Suppress some noisy warnings
 warnings.filterwarnings("ignore", category=UserWarning)
