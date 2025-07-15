@@ -35,6 +35,7 @@ try:
         from unsloth import FastLanguageModel
         from unsloth.chat_templates import get_chat_template
         from trl import SFTTrainer
+        from transformers import TrainingArguments  # Add this line!
         USE_UNSLOTH = True
         TRAINING_MODE = "unsloth_gpu"
     else:
