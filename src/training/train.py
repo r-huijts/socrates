@@ -58,19 +58,19 @@ class SocraticTrainer:
         """
         self.config_loader = ConfigLoader()
         self.training_config = self.config_loader.load_training_config(config_path)
-        self.model_config = self.config_loader.load_model_config()
+        self.model_config, self.lora_config, self.quant_config = self.config_loader.load_model_config()
 
         self.device_manager = DeviceManager()
         self.device_manager.print_device_info()
         # Override model config based on device
         recommended_model = self.device_manager.get_model_name_for_environment(
-            self.model_config['model']['name']
+            self.model_config.name
         )
-        if recommended_model != self.model_config['model']['name']:
+        if recommended_model != self.model_config.name:
             print(f"🔄 Switching model for local testing:")
-            print(f"   Original: {self.model_config['model']['name']}")
+            print(f"   Original: {self.model_config.name}")
             print(f"   Using: {recommended_model}")
-            self.model_config['model']['name'] = recommended_model
+            self.model_config.name = recommended_model
         
         # Check if we should actually train
         if not self.device_manager.should_run_training():
@@ -99,8 +99,7 @@ class SocraticTrainer:
         """
         print("🤖 Loading Qwen2.5 model with Unsloth optimizations...")
         
-        model_name = self.model_config['model']['name']
-        
+        model_name = self.model_config.name
         # Load model and tokenizer with Unsloth's FastLanguageModel
         self.model, self.tokenizer = FastLanguageModel.from_pretrained(
             model_name=model_name,
