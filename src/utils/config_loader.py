@@ -37,6 +37,7 @@ class TrainingConfig:
     logging_steps: int
     save_steps: int
     eval_steps: int
+    max_seq_length: int = 2048
 
 class ConfigLoader:
     def __init__(self, config_dir: str = "config"):
