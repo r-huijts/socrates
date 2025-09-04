@@ -1,5 +1,5 @@
 # Core ML libraries
-torch>=2.0.0
+# torch>=2.0.0  <- IMPORTANT: Comment this out when running on RunPod or any pre-configured PyTorch environment
 transformers>=4.36.0
 datasets>=2.14.0
 accelerate>=0.24.0
